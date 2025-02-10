@@ -1,0 +1,5 @@
+# Ignorer le dossier 'data/' (contenant les datasets)
+data/*
+
+# Mais garder le dossier 'data/' versionné
+!data/.gitkeep

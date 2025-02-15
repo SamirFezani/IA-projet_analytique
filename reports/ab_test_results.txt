@@ -1,0 +1,3 @@
+Taux de conversion A : 0.9680
+Taux de conversion B : 0.9664
+P-value : 0.0000

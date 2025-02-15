@@ -2,7 +2,10 @@ import pandas as pd
 import numpy as np
 import scipy.stats as stats
 import logging
-from config import PROCESSED_DATA_PATH
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+from config import PROCESSED_DATA_PATH, REPORTS_PATH
 
 # Configuration du logging
 logging.basicConfig(
@@ -28,7 +31,7 @@ class ABTesting:
         logging.info("Préparation des groupes de test...")
         
         # Filtrer les ajouts au panier et les transactions
-        add_to_cart = self.events[self.events["event"] == "addtocart"].copy()  # 🔹 Ajout de .copy() pour éviter le warning
+        add_to_cart = self.events[self.events["event"] == "addtocart"].copy()  # Ajout de .copy() pour éviter le warning
         transactions = self.events[self.events["event"] == "transaction"]
 
         # Associer chaque utilisateur à un groupe aléatoire (A ou B) en utilisant .loc
@@ -42,7 +45,7 @@ class ABTesting:
         return merged
 
     def perform_ab_test(self, data):
-        """Effectuer un test statistique entre les groupes A et B."""
+        """Effectuer un test statistique entre les groupes A et B et enregistrer les résultats."""
         logging.info("Exécution du test A/B...")
 
         # Calcul des taux de conversion
@@ -58,11 +61,20 @@ class ABTesting:
         logging.info(f"Taux de conversion A : {rate_A:.4f}, Taux de conversion B : {rate_B:.4f}")
         logging.info(f"Test statistique : p-value = {p_value:.4f}")
 
-        if p_value < 0.05:
-            logging.info("Différence significative entre A et B.")
-        else:
-            logging.info("Aucune différence significative.")
+        # Enregistrement des résultats dans un fichier texte
+        results_text = f"Taux de conversion A : {rate_A:.4f}\nTaux de conversion B : {rate_B:.4f}\nP-value : {p_value:.4f}\n"
+        with open(os.path.join(REPORTS_PATH, "ab_test_results.txt"), "w") as f:
+            f.write(results_text)
 
+        # Création d'un graphique et enregistrement dans `reports/`
+        plt.figure(figsize=(8, 5))
+        sns.barplot(x=["A", "B"], y=[rate_A, rate_B], palette="viridis")
+        plt.title("Taux de conversion des groupes A/B")
+        plt.ylabel("Taux de conversion")
+        plt.savefig(os.path.join(REPORTS_PATH, "ab_test_plot.png"))
+        plt.close()
+
+        logging.info("Résultats enregistrés dans 'reports/'.")
         return rate_A, rate_B, p_value
 
     def run(self):

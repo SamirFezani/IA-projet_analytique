@@ -31,10 +31,10 @@ class ABTesting:
         logging.info("Préparation des groupes de test...")
         
         # Filtrer les ajouts au panier et les transactions
-        add_to_cart = self.events[self.events["event"] == "addtocart"].copy()  # Ajout de .copy() pour éviter le warning
+        add_to_cart = self.events[self.events["event"] == "addtocart"].copy()
         transactions = self.events[self.events["event"] == "transaction"]
 
-        # Associer chaque utilisateur à un groupe aléatoire (A ou B) en utilisant .loc
+        # Associer chaque utilisateur à un groupe aléatoire (A ou B)
         add_to_cart.loc[:, "group"] = np.random.choice(["A", "B"], size=len(add_to_cart), p=[0.5, 0.5])
 
         # Fusionner avec les transactions pour voir qui a acheté
@@ -55,18 +55,30 @@ class ABTesting:
         rate_A = conversion_A.mean()
         rate_B = conversion_B.mean()
 
-        # Test de proportions (test t de Student)
+        # Test t de Student
         stat, p_value = stats.ttest_ind(conversion_A, conversion_B, equal_var=False)
 
         logging.info(f"Taux de conversion A : {rate_A:.4f}, Taux de conversion B : {rate_B:.4f}")
         logging.info(f"Test statistique : p-value = {p_value:.4f}")
 
-        # Enregistrement des résultats dans un fichier texte
+        # Enregistrement des résultats en fichier texte
         results_text = f"Taux de conversion A : {rate_A:.4f}\nTaux de conversion B : {rate_B:.4f}\nP-value : {p_value:.4f}\n"
         with open(os.path.join(REPORTS_PATH, "ab_test_results.txt"), "w") as f:
             f.write(results_text)
 
-        # Création d'un graphique et enregistrement dans `reports/`
+        # Export des résultats en CSV
+        results_df = pd.DataFrame({
+            "Groupe": ["A", "B"],
+            "Conversions": [conversion_A.sum(), conversion_B.sum()],
+            "Total Utilisateurs": [len(conversion_A), len(conversion_B)],
+            "Taux de Conversion": [rate_A, rate_B],
+            "p-value": [p_value, p_value]  # Même valeur pour les deux groupes
+        })
+
+        results_df.to_csv(os.path.join(REPORTS_PATH, "ab_test_results.csv"), index=False)
+        logging.info("Résultats enregistrés dans 'reports/ab_test_results.csv'.")
+
+        # Création d'un graphique
         plt.figure(figsize=(8, 5))
         sns.barplot(x=["A", "B"], y=[rate_A, rate_B], palette="viridis")
         plt.title("Taux de conversion des groupes A/B")
@@ -74,7 +86,6 @@ class ABTesting:
         plt.savefig(os.path.join(REPORTS_PATH, "ab_test_plot.png"))
         plt.close()
 
-        logging.info("Résultats enregistrés dans 'reports/'.")
         return rate_A, rate_B, p_value
 
     def run(self):

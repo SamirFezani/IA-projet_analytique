@@ -16,6 +16,9 @@ Ce projet analyse le comportement des utilisateurs sur un **site e-commerce** à
 - 🔗 **Tableau de bord Tableau Public** : [Voir ici](https://public.tableau.com/app/profile/samir.fezani/vizzes)  
 - 🖥️ **Application Streamlit** : À exécuter en local (voir ci-dessous).  
 - 📂 **Code source GitHub** : [Lien vers le repo](https://github.com/SamirFezani/IA-projet_analytique)  
+- 🔍 Tests A/B pour améliorer les conversions [Voir ici](https://public.tableau.com/app/profile/samir.fezani/viz/Tableau_de_bord_performances_site_ecommerce/Tableaudeborddesperformances)
+- 🌍 Tableau de bord interactif intégré dans Streamlit
+- 🔄 Mise à jour facile des données via Tableau Public
 
 ---
 
